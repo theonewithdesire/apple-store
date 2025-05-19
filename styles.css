@@ -76,7 +76,71 @@ main {
     box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
 }
 
+/* ... (کدهای قبلی CSS بدون تغییر) ... */
 
+.search-container {
+    margin-bottom: 1rem;
+    text-align: center;
+    position: relative; /* برای جای‌گیری صحیح کانتینر پیشنهادات */
+}
+
+#searchInput {
+    width: 100%;
+    max-width: 500px;
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--primary-light);
+    border-radius: 50px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+#searchInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
+}
+
+/* استایل‌های جدید برای پیشنهادات */
+.suggestions-container {
+    position: absolute;
+    background-color: var(--card-bg);
+    border: 1px solid var(--primary-light);
+    border-top: none; /* برای چسبیدن بهتر به زیر اینپوت */
+    border-radius: 0 0 8px 8px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 500px; /* باید با max-width سرچ اینپوت یکی باشد */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100; /* برای قرار گرفتن روی سایر المان‌ها */
+    max-height: 250px; /* ارتفاع ماکزیمم برای اسکرول */
+    overflow-y: auto;
+    display: none; /* در ابتدا مخفی */
+}
+
+.suggestion-item {
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    border-bottom: 1px solid var(--primary-light); /* جداکننده بین آیتم‌ها */
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover, .suggestion-item.active { /* .active برای ناوبری با کیبورد */
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.suggestion-item strong { /* برای برجسته کردن بخش تایپ شده */
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+/* ... (بقیه کدهای CSS بدون تغییر) ... */
 
 .app-grid {
     display: grid;
