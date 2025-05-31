@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Details</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Additional or overridden styles for this page */
+        .app-detail-container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-top: 2rem;
+        }
+        .app-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--primary-light);
+        }
+        .app-icon-placeholder {
+            width: 100px;
+            height: 100px;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border-radius: 20px;
+            text-transform: uppercase;
+            flex-shrink: 0; /* Prevents shrinking if title is too long */
+        }
+        .app-title-section h2 {
+            font-size: 2.2rem;
+            color: var(--text-dark);
+            margin-bottom: 0.3rem;
+        }
+        .app-description {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+        .app-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .meta-item {
+            background-color: var(--background);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .meta-item strong {
+            display: block;
+            color: var(--primary-dark);
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        .download-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            text-align: center;
+            margin-bottom: 1.5rem; /* Added margin for spacing */
+        }
+        .download-button:hover {
+            background-color: var(--primary-dark);
+        }
+        .rating-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--primary-light);
+            margin-bottom: 1.5rem; /* Added margin for spacing */
+        }
+        .rating-section .stars {
+            font-size: 1.8rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Styles for Similar Apps Section */
+        .similar-apps-section {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--primary-light);
+        }
+        .similar-apps-section h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+        }
+        /* Re-using app-grid and app-card from styles.css */
+        /* If you want smaller cards for similar apps: */
+        .similar-apps-grid .app-card {
+            /* Example: Make cards a bit smaller or less detailed */
+            /* padding: 0.8rem; */
+        }
+        .similar-apps-grid .app-name {
+            font-size: 1rem; /* Smaller font for similar app names */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .similar-apps-grid .app-info {
+            font-size: 0.85rem;
+        }
+        .similar-apps-grid .stars {
+            font-size: 0.9em; /* Smaller stars */
+        }
+        .similar-apps-grid .rating-value {
+            font-size: 0.9em; /* Smaller rating value */
+        }
+        .similar-apps-grid .app-content {
+            padding: 0.8rem; /* Reduced padding for content */
+        }
+        .similar-apps-grid .app-header {
+            padding: 0.8rem 1rem; /* Reduced padding for header */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="appDetailHeaderTitle">App Details</h1>
+        <p><a href="index.html" style="color: var(--text-light); text-decoration:none;">← Back to App List</a></p>
+    </header>
+    
+    <main>
+        <a href="index.html" class="back-link">← Back to List</a>
+        <div id="appDetailContainer" class="app-detail-container">
+            <!-- App details content will be loaded here by JavaScript -->
+            <div class="loading">Loading app details...</div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>Apple Store Data Viewer - App Detail</p>
+    </footer>
+
+    <script src="app-detail.js"></script>
+</body>
+</html>

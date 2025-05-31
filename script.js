@@ -1,35 +1,23 @@
+// --- START OF FILE script.js ---
+
 document.addEventListener('DOMContentLoaded', function() {
     const appContainer = document.getElementById('appContainer');
     const searchInput = document.getElementById('searchInput');
     const sortOptions = document.getElementById('sortOptions');
-    const suggestionsContainer = document.getElementById('suggestionsContainer'); // المان جدید
+    const suggestionsContainer = document.getElementById('suggestionsContainer');
 
     let allApps = [];
     let currentSortOrder = 'default';
-    let suggestionFocusIndex = -1; // برای ناوبری با کیبورد در پیشنهادات
+    let suggestionFocusIndex = -1;
 
-    async function fetchData() {
-        // ... (کد fetchData بدون تغییر) ...
-        try {
-            const response = await fetch('AppleStore.csv');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const csvText = await response.text();
-            return parseCSV(csvText);
-        } catch (error) {
-            console.error('Error fetching or parsing CSV:', error);
-            appContainer.innerHTML = `<div class="error">Failed to load data. Server response: ${error.message}. Please check file path and ensure server is running.</div>`;
-            suggestionsContainer.style.display = 'none'; // مخفی کردن پیشنهادات در صورت خطا
-            return null;
-        }
-    }
-    
+    // =======================================================================
+    // ### شروع تغییر: اضافه کردن تابع parseCSV ###
+    // =======================================================================
     function parseCSV(text) {
-        // ... (کد parseCSV بدون تغییر) ...
         const lines = text.trim().split('\n');
         const headers = lines[0].split(',').map(header => {
             let h = header.trim();
+            // حذف کوتیشن‌های اضافی از هدرها
             if (h.length >= 2 && h.startsWith('"') && h.endsWith('"')) {
                 h = h.substring(1, h.length - 1);
             }
@@ -44,10 +32,11 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
                 
-                if (char === '"' && (i === 0 || line[i-1] !== '"')) {
+                if (char === '"') {
+                    // بررسی دابل کوتیشن برای کوتیشن داخل رشته
                     if (i + 1 < line.length && line[i+1] === '"') {
                         currentValue += '"';
-                        i++; 
+                        i++; // رد شدن از دابل کوتیشن
                         continue;
                     }
                     inQuotes = !inQuotes;
@@ -58,23 +47,54 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentValue += char;
                 }
             }
-            values.push(currentValue.trim());
+            values.push(currentValue.trim()); // اضافه کردن آخرین مقدار
             
             const row = {};
             headers.forEach((header, index) => {
                 let val = values[index] || '';
-                if (val.length >= 2 && val.startsWith('"') && val.endsWith('"')) {
-                    val = val.substring(1, val.length - 1);
-                }
+                // حذف کوتیشن‌های اضافی از مقادیر، اگر لازم باشد (معمولا برای CSV لازم نیست مگر اینکه داده‌ها به این شکل باشند)
+                // if (val.length >= 2 && val.startsWith('"') && val.endsWith('"')) {
+                //     val = val.substring(1, val.length - 1);
+                // }
                 row[header] = val;
             });
             
+            // اطمینان از اینکه ردیف دارای id و track_name است (مهم برای جلوگیری از خطا)
             return row;
-        }).filter(row => row.id && row.track_name);
+        }).filter(row => row && row.id && row.track_name); // افزودن row && برای جلوگیری از خطای ردیف‌های خالی احتمالی
+    }
+    // =======================================================================
+    // ### پایان تغییر: اضافه کردن تابع parseCSV ###
+    // =======================================================================
+
+    async function fetchData() {
+        try {
+            const response = await fetch('AppleStore.csv');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const csvText = await response.text();
+            return parseCSV(csvText); // حالا parseCSV تعریف شده است
+        } catch (error) {
+            console.error('Error fetching or parsing CSV:', error);
+            // نمایش پیام خطا به کاربر، شامل خطای اصلی از catch
+            // و اطمینان از اینکه error.message وجود دارد
+            let errorMessage = "Unknown error occurred.";
+            if (error && error.message) {
+                // اگر خطا از parseCSV باشد، ممکن است پیام بهتری بدهیم
+                if (error.message.includes("not defined")) {
+                     errorMessage = `A crucial function (${error.message.split(" ")[0]}) is missing or not loaded correctly.`;
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+            appContainer.innerHTML = `<div class="error">Failed to load data. Server response: ${errorMessage}. Please check file path and ensure server is running.</div>`;
+            suggestionsContainer.style.display = 'none';
+            return null;
+        }
     }
     
     function renderApps(appsToDisplay, limit = 50) {
-        // ... (کد renderApps بدون تغییر) ...
         if (!appsToDisplay) {
             appContainer.innerHTML = '<div class="error">Error: No app data to display.</div>';
             return;
@@ -88,11 +108,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const appsToShowOnPage = appsToDisplay.slice(0, limit);
         
         appsToShowOnPage.forEach(app => {
+            const appCardLink = document.createElement('a');
+            appCardLink.href = `app-detail.html?id=${app.id}`;
+            appCardLink.className = 'app-card-link';
+            appCardLink.style.textDecoration = 'none';
+            appCardLink.style.color = 'inherit';
+        
             const appCard = document.createElement('div');
             appCard.className = 'app-card';
             
             const price = parseFloat(app.price) === 0 ? 'FREE' : `$${Number(app.price).toFixed(2)}`;
-            
             const rating = parseFloat(app.user_rating) || 0;
             const stars = '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
             
@@ -114,12 +139,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             
-            appContainer.appendChild(appCard);
+            appCardLink.appendChild(appCard);
+            appContainer.appendChild(appCardLink);
         });
     }
 
     function sortApps(apps, sortOrder) {
-        // ... (کد sortApps بدون تغییر) ...
         const sortedApps = [...apps];
 
         switch (sortOrder) {
@@ -143,19 +168,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'default':
             default:
-                return apps; 
+                // برگرداندن آرایه اصلی اگر سورت پیش‌فرض است یا گزینه‌ای نامعتبر انتخاب شده
+                return apps; // یا یک کپی از آن اگر نمی‌خواهید آرایه اصلی تغییر کند: return [...apps];
         }
         return sortedApps;
     }
     
     function displayProcessedApps() {
-        // ... (کد displayProcessedApps بدون تغییر، اما مطمئن شوید پیشنهادات را مخفی می‌کند) ...
         if (!allApps || allApps.length === 0) {
+            // اگر هنوز در حال بارگذاری اولیه هستیم، پیام "loading" را تغییر نده
             if (appContainer.innerHTML.includes('loading')) {
-            } else if (!appContainer.innerHTML.includes('error')) {
+                // کاری نکن، منتظر بمان تا داده‌ها بارگذاری شوند یا خطا رخ دهد
+            } else if (!appContainer.innerHTML.includes('error')) { // اگر خطا هم نمایش داده نشده
                  appContainer.innerHTML = '<div class="no-results">No app data available.</div>';
             }
-            suggestionsContainer.style.display = 'none'; // مخفی کردن پیشنهادات
+            suggestionsContainer.style.display = 'none';
             return;
         }
 
@@ -172,12 +199,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortedAndFilteredApps = sortApps(filteredApps, currentSortOrder);
         
         renderApps(sortedAndFilteredApps);
-        // اگر جستجو فعال است و پیشنهادات نمایش داده می‌شوند، آنها را مخفی نمی‌کنیم مگر اینکه کاربر آیتمی را انتخاب کند.
     }
 
-    // --- توابع جدید برای مدیریت پیشنهادات ---
     function showSuggestions(searchTerm) {
-        if (!allApps || searchTerm.length < 1) { // حداقل 1 کاراکتر برای نمایش پیشنهاد
+        if (!allApps || searchTerm.length < 1) {
             suggestionsContainer.innerHTML = '';
             suggestionsContainer.style.display = 'none';
             suggestionFocusIndex = -1;
@@ -185,28 +210,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const matchedApps = allApps.filter(app =>
-            (app.track_name || "").toLowerCase().startsWith(searchTerm.toLowerCase()) // فقط آنهایی که با عبارت شروع می‌شوند
-        ).slice(0, 7); // محدود کردن تعداد پیشنهادات (مثلاً به ۷)
+            (app.track_name || "").toLowerCase().startsWith(searchTerm.toLowerCase())
+        ).slice(0, 7);
 
         suggestionsContainer.innerHTML = '';
         if (matchedApps.length > 0) {
             matchedApps.forEach(app => {
                 const item = document.createElement('div');
                 item.classList.add('suggestion-item');
-                // برجسته کردن بخش تایپ شده
                 const appName = app.track_name || "";
                 const matchIndex = appName.toLowerCase().indexOf(searchTerm.toLowerCase());
-                if (matchIndex > -1) { // باید همیشه 0 باشد چون از startsWith استفاده کردیم
+                if (matchIndex > -1) {
                     item.innerHTML = `<strong>${appName.substring(0, searchTerm.length)}</strong>${appName.substring(searchTerm.length)}`;
                 } else {
-                    item.textContent = appName; // Fallback
+                    item.textContent = appName;
                 }
                 
                 item.addEventListener('click', function() {
-                    searchInput.value = app.track_name; // پر کردن فیلد جستجو
-                    suggestionsContainer.style.display = 'none'; // مخفی کردن پیشنهادات
+                    searchInput.value = app.track_name;
+                    suggestionsContainer.style.display = 'none';
                     suggestionFocusIndex = -1;
-                    displayProcessedApps(); // نمایش نتایج جستجو
+                    displayProcessedApps();
                 });
                 suggestionsContainer.appendChild(item);
             });
@@ -214,10 +238,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             suggestionsContainer.style.display = 'none';
         }
-        suggestionFocusIndex = -1; // ریست کردن فوکوس با هر بار آپدیت پیشنهادات
+        suggestionFocusIndex = -1;
     }
 
-    // مخفی کردن پیشنهادات وقتی روی جای دیگری کلیک می‌شود
     document.addEventListener('click', function(event) {
         if (!searchInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
             suggestionsContainer.style.display = 'none';
@@ -225,36 +248,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Event listener برای تغییر نوع مرتب‌سازی
     sortOptions.addEventListener('change', function() {
         currentSortOrder = this.value;
-        suggestionsContainer.style.display = 'none'; // مخفی کردن پیشنهادات هنگام تغییر سورت
+        suggestionsContainer.style.display = 'none';
         displayProcessedApps();
     });
 
-    // Event listener برای جستجو و پیشنهادات
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.trim();
-        if (searchTerm === "") { // اگر فیلد جستجو خالی شد
+        if (searchTerm === "") {
             suggestionsContainer.style.display = 'none';
             suggestionFocusIndex = -1;
-            displayProcessedApps(); // نمایش همه اپ‌ها (با سورت فعلی)
+            displayProcessedApps();
         } else {
             showSuggestions(searchTerm);
-            // displayProcessedApps(); // دیگر نیازی به فراخوانی مستقیم این نیست، چون انتخاب پیشنهاد آن را فراخوانی می‌کند
-                                   // یا اگر می‌خواهید نتایج همزمان با تایپ آپدیت شوند، این را فعال نگه دارید.
-                                   // برای تجربه کاربری بهتر، شاید بهتر باشد فقط با enter یا انتخاب پیشنهاد، نتایج فیلتر شوند.
-                                   // در حال حاضر، با هر تایپ هم نتایج گرید آپدیت می‌شوند و هم پیشنهادات.
-            displayProcessedApps(); // این خط را نگه می‌داریم تا نتایج همزمان با تایپ آپدیت شوند.
+            displayProcessedApps();
         }
     });
     
-    // ناوبری با کیبورد برای پیشنهادات
     searchInput.addEventListener('keydown', function(e) {
         const items = suggestionsContainer.querySelectorAll('.suggestion-item');
         if (suggestionsContainer.style.display === 'block' && items.length > 0) {
             if (e.key === 'ArrowDown') {
-                e.preventDefault(); // جلوگیری از حرکت کرسر در اینپوت
+                e.preventDefault();
                 suggestionFocusIndex++;
                 if (suggestionFocusIndex >= items.length) suggestionFocusIndex = 0;
                 updateSuggestionFocus(items);
@@ -265,21 +281,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateSuggestionFocus(items);
             } else if (e.key === 'Enter') {
                 if (suggestionFocusIndex > -1 && items[suggestionFocusIndex]) {
-                    e.preventDefault(); // جلوگیری از submit فرم (اگر در فرم بود)
-                    items[suggestionFocusIndex].click(); // شبیه‌سازی کلیک روی آیتم انتخاب شده
+                    e.preventDefault();
+                    items[suggestionFocusIndex].click();
                 } else {
-                    // اگر آیتمی انتخاب نشده بود و Enter زده شد، فقط پیشنهادات را ببند
                     suggestionsContainer.style.display = 'none';
                     suggestionFocusIndex = -1;
-                    displayProcessedApps(); // و نتایج فعلی را نمایش بده
+                    displayProcessedApps();
                 }
             } else if (e.key === 'Escape') {
                 suggestionsContainer.style.display = 'none';
                 suggestionFocusIndex = -1;
             }
-        } else if (e.key === 'Enter') { // اگر پیشنهادات باز نبودند و Enter زده شد
+        } else if (e.key === 'Enter') {
              e.preventDefault();
-             displayProcessedApps(); // فقط نتایج جستجو را آپدیت کن
+             displayProcessedApps();
         }
     });
 
@@ -287,19 +302,18 @@ document.addEventListener('DOMContentLoaded', function() {
         items.forEach(item => item.classList.remove('active'));
         if (items[suggestionFocusIndex]) {
             items[suggestionFocusIndex].classList.add('active');
-            // اسکرول به آیتم فعال در صورت نیاز
             items[suggestionFocusIndex].scrollIntoView({ block: 'nearest' });
         }
     }
     
-    // تابع init برای شروع
     (async function init() {
-        appContainer.innerHTML = '<div class="loading">Loading apps</div>';
+        appContainer.innerHTML = '<div class="loading">Loading apps...</div>'; // افزودن سه نقطه به پیام بارگذاری
         const fetchedApps = await fetchData();
         if (fetchedApps) {
             allApps = fetchedApps;
             displayProcessedApps(); 
         }
-        // اگر fetchedApps null باشد، خطا قبلا مدیریت شده.
+        // اگر fetchedApps null باشد، خطا قبلا در fetchData مدیریت شده و پیام به کاربر نمایش داده شده است.
     })();
 });
+// --- END OF FILE script.js ---
