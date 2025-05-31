@@ -14,7 +14,25 @@
     
     <main>
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search apps...">
+            <input type="text" id="searchInput" placeholder="Search apps..." autocomplete="off">
+            <div id="suggestionsContainer" class="suggestions-container">
+                <!-- پیشنهادات اینجا نمایش داده می‌شوند -->
+            </div>
+        </div>
+
+        <div class="controls-container">
+            <div class="sort-container">
+                <label for="sortOptions">Sort by:</label>
+                <select id="sortOptions">
+                    <option value="default">Default</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="price-asc">Price (Low to High)</option>
+                    <option value="price-desc">Price (High to Low)</option>
+                    <option value="rating-desc">Rating (High to Low)</option>
+                    <option value="rating-asc">Rating (Low to High)</option>
+                </select>
+            </div>
         </div>
         
         <div class="app-grid" id="appContainer">
@@ -28,4 +46,4 @@
 
     <script src="script.js"></script>
 </body>
-</html> 
+</html>
